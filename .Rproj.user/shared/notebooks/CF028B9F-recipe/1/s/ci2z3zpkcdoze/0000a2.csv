@@ -1,0 +1,3 @@
+"0","wordcloud(wordcloudDf$ingredient, wordcloudDf$cnt, scale = c(1.5,.25), min.freq = 0,"
+"0","          max.words = 100, "
+"0","          colors = brewer.pal(max(7, ncol(wordcloudDf$cnt)),""Greens""))"

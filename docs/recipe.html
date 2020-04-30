@@ -23,13 +23,6 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<script src="site_libs/htmlwidgets-1.5.1/htmlwidgets.js"></script>
-<script src="site_libs/plotly-binding-4.9.2/plotly.js"></script>
-<script src="site_libs/typedarray-0.1/typedarray.min.js"></script>
-<link href="site_libs/crosstalk-1.0.0/css/crosstalk.css" rel="stylesheet" />
-<script src="site_libs/crosstalk-1.0.0/js/crosstalk.min.js"></script>
-<link href="site_libs/plotly-htmlwidgets-css-1.52.2/plotly-htmlwidgets.css" rel="stylesheet" />
-<script src="site_libs/plotly-main-1.52.2/plotly-latest.min.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -285,7 +278,7 @@ $(document).ready(function () {
   <a href="about.html">About</a>
 </li>
 <li>
-  <a href="recipe.html">Recipe</a>
+  <a href="recipe.html">Recipes</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -304,147 +297,30 @@ $(document).ready(function () {
 </div>
 
 
-<div id="recipe" class="section level1 tabset tabset-fade tabset-pills">
-<h1>Recipe</h1>
-<div id="get-the-data" class="section level2">
-<h2>Get the data</h2>
-<p>Extract the Top 1000 popular vegetarian recipes and their ingredient using <a href="https://spoonacular.com/food-api">Spoonacular API</a>.</p>
-<pre class="r"><code># the API key of Spoonacular is stored as environment variable &quot;spoonacular_api_key&quot; and &quot;spoonacular_api_key_ljy&quot;
-
-# store and retrive key to environment 
-#Sys.setenv(spoonacular_api_key = &quot;&quot;)
-#Sys.getenv(&quot;spoonacular_api_key&quot;)
-
-
-combined &lt;- data.frame(recipe_id = integer(),
-                       recipe_name = character())
-
-for (n in seq(0,900,100)) {
-  request &lt;- httr::GET(
-    &quot;https://api.spoonacular.com/recipes/complexSearch&quot;, 
-    query = list(apiKey = Sys.getenv(&quot;spoonacular_api_key&quot;),
-                 diet = &quot;vegetarian&quot;,
-                 number = 100,
-                 offset = n, # Spoonacular API only allows this to range from 0 to 900
-                 sort = &quot;popularity&quot;,
-                 sortDirection = &quot;desc&quot;
-                 )
-    )  
-  
-  response &lt;- jsonlite::fromJSON(httr::content(request, as = &quot;text&quot;, encoding = &quot;UTF-8&quot;), flatten = TRUE)[[1]] %&gt;%
-  dplyr::select(recipe_id = id, recipe_name = title)
-  
-  combined &lt;- rbind(combined, response)
-  
-  print(paste(&quot;extracted&quot;, n + 100, &quot;recipes&quot;))
-}
-
-save(combined, file = &quot;data\\combined_recipe_id.RData&quot;)</code></pre>
-<pre class="r"><code>combined &lt;- combined %&gt;%
-  mutate(ingredient = NA)
-
-for (i in 1:nrow(combined)) {
-  recipe_id &lt;- combined[i, &quot;recipe_id&quot;]
-  request &lt;- httr::GET(
-    paste0(&quot;https://api.spoonacular.com/recipes/&quot;,recipe_id,&quot;/ingredientWidget.json&quot;), 
-    query = list(apiKey = Sys.getenv(&quot;spoonacular_api_key&quot;)))
-  
-  response &lt;- jsonlite::fromJSON(httr::content(request, as = &quot;text&quot;, encoding = &quot;UTF-8&quot;), flatten = TRUE)[[1]] 
-  
-  ingredient &lt;- response[[&quot;name&quot;]]
-  
-  combined[i, &quot;ingredient&quot;] &lt;- paste(ingredient, collapse = &quot;//&quot;)
-}
-
-save(combined, file = &quot;data\\combined_recipe_id_ingredient.RData&quot;)</code></pre>
-</div>
-<div id="preprocess" class="section level2">
-<h2>Preprocess</h2>
-<pre class="r"><code>library(stringr)
-library(SemNetCleaner)
-
-load(&quot;data\\combined_recipe_id_ingredient.RData&quot;)
-
-allIngredient &lt;- paste(combined$ingredient, collapse = &quot;//&quot;)
-ingredientList &lt;- strsplit(allIngredient, &quot;//&quot;)
-ingredientDf &lt;- data.frame(ingredientList, stringsAsFactors = FALSE)
-names(ingredientDf) &lt;- &quot;ingredient&quot;
-
-ingredientDf &lt;- ingredientDf %&gt;%
-  mutate(ingredient = case_when(ingredient %in% c(&quot;bread flour&quot;, &quot;all purpose flour&quot;,&quot;gluten-free gluten free all purpose baking flour&quot;,&quot;whole wheat white flour&quot;,&quot;canned all purpose flour&quot;,&quot;plain flour&quot;,&quot;AP flour&quot;,&quot;plain all purpose flour&quot;,&quot;gluten free flour&quot;,&quot;gluten-free flour&quot;,&quot;unbleached flour&quot;,&quot;unbleached all purpose flour&quot;,&quot;white bread flour&quot;) ~ &quot;flour&quot;,
-                                ingredient %in% c(&quot;whole wheat flour&quot;,&quot;white whole wheat flour&quot;,&quot;white whole wheat pastry flour&quot;,&quot;whole-wheat pastry flour&quot;) ~ &quot;whole wheat flour&quot;,
-                                ingredient == &quot;ground cinnamon&quot; ~ &quot;cinnamon&quot;,
-                                ingredient == &quot;baking powder&quot; ~ &quot;baking soda&quot;,
-                                ingredient == &quot;garlic cloves&quot; ~ &quot;garlic&quot;,
-                                ingredient %in% c(&quot;fresh lemon juice&quot;, &quot;lemon (juice)&quot;) ~ &quot;lemon juice&quot;,
-                                ingredient == &quot;egg yolks&quot; ~ &quot;egg yolk&quot;,
-                                ingredient == &quot;egg whites&quot; ~ &quot;egg white&quot;,
-                                ingredient %in% c(&quot;unsalted butter&quot;, &quot;salted butter&quot;, &quot;unsalted salted butter&quot;) ~ &quot;butter&quot;,
-                                ingredient == &quot;half n half cream&quot; ~ &quot;half &amp; half cream&quot;,
-                                ingredient %in% c(&quot;red onion&quot;, &quot;vidalia onion&quot;, &quot;yellow onion&quot;, &quot;white onion&quot;, &quot;sweet onion&quot;, &quot;red white yellow onion&quot;, &quot;red diced onion&quot;, &quot;white yellow onion&quot;, &quot;yellow onions&quot;, &quot;red onions&quot;, &quot;sweet onions&quot;, &quot;onions&quot;) ~ &quot;onion&quot;,
-                                ingredient %in% c(&quot;green onions&quot;, &quot;spring onions&quot;, &quot;scallions&quot;, &quot;green white scallions&quot;, &quot;scallion&quot;, &quot;green white light scallions&quot;) ~ &quot;green onion&quot;,
-                                ingredient == &quot;apples&quot; ~ &quot;apple&quot;,
-                                ingredient == &quot;basil leaves&quot; ~ &quot;basil&quot;,
-                                ingredient == &quot;bay leaves&quot; ~ &quot;bay leaf&quot;,
-                                ingredient %in% c(&quot;barbecue sauce&quot;, &quot;Barbeque Dipping Sauce&quot;) ~ &quot;bbq sauce&quot;,
-                                TRUE ~ ingredient))
-
-ingredientDf[str_detect(ingredientDf$ingredient, &quot;\\b(apple|apples)$&quot;),] &lt;- &quot;apple&quot; # because the singularize() function has trouble dealing with &quot;apples&quot;, so we have to move this one up to here
-
-ingredientDf &lt;- ingredientDf %&gt;%
-  mutate(ingredient = str_replace(ingredient, &quot;^(dried |diced |fresh |frozen |whole )+(.*)$&quot;, &quot;\\2&quot;)) # remove leading dried, diced ...
-
-ingredientDf$ingredient &lt;- unlist(map(ingredientDf$ingredient, singularize)) # plural to single, takes a few minutes to run
-
-# combine some too detailed ingredient
-ingredientDf[str_detect(ingredientDf$ingredient, &quot;sugar&quot;),]  &lt;- &quot;sugar&quot;
-ingredientDf[str_detect(ingredientDf$ingredient, &quot;\\bsalt\\b&quot;),] &lt;- &quot;salt&quot;
-ingredientDf[str_detect(ingredientDf$ingredient, &quot;flour tortillas&quot;),] &lt;- &quot;flour tortillas&quot;
-ingredientDf[str_detect(ingredientDf$ingredient, &quot;coconut milk&quot;),] &lt;- &quot;coconut milk&quot;
-ingredientDf[str_detect(ingredientDf$ingredient, &quot;peanut butter&quot;),] &lt;- &quot;peanut butter&quot;
-ingredientDf[str_detect(ingredientDf$ingredient, &quot;oil$&quot;),] &lt;- &quot;oil&quot;
-ingredientDf[str_detect(ingredientDf$ingredient, &quot;cheese$&quot;),] &lt;- &quot;cheese&quot;
-ingredientDf[str_detect(ingredientDf$ingredient, &quot;sour cream$&quot;),] &lt;- &quot;sour cream&quot;
-
-ingredientDfCleaned &lt;- ingredientDf %&gt;%
-  group_by(ingredient) %&gt;%
-  summarise(cnt = n()) %&gt;%
-  ungroup() %&gt;%
-  arrange(desc(cnt))
-
-save(ingredientDfCleaned, file = &quot;data\\ingredientDfCleaned.RData&quot;)</code></pre>
-</div>
-<div id="visualization" class="section level2">
-<h2>Visualization</h2>
-<div id="wordcloud" class="section level3">
-<h3>Wordcloud</h3>
-<p>If all ingredients are included …</p>
+<p>What does a vegetarian diet consist of? What are the most popular elements in vegetarian diet? To find out what a vegetarian’s diet is like, we collect the top 1000 popular vegetarian recipes using the <a href="https://spoonacular.com/food-api">Spoonacular API</a> and create a wordcloud with the most popular ingredients.</p>
 <pre class="r"><code>library(wordcloud)
 
 load(&quot;data\\ingredientDfCleaned.RData&quot;)
 
-wordcloudDf &lt;- ingredientDfCleaned 
-
-set.seed(1997)
-wordcloud(wordcloudDf$ingredient, wordcloudDf$cnt, scale = c(2,.5), min.freq = 0,
-          max.words = 100, 
-          colors = &quot;#41ab5d&quot;)</code></pre>
-<p><img src="figures/unnamed-chunk-4-1.png" width="672" /></p>
-<p>Exclude ingredients that are too rare (appeared less than 5 times) or too common (more than 100 times).</p>
-<pre class="r"><code>wordcloudDf &lt;- ingredientDfCleaned %&gt;%
+wordcloudDf &lt;- ingredientDfCleaned %&gt;%
   filter(cnt &gt; 10 &amp; cnt &lt; 100) 
 
 set.seed(1997)
+#wordcloud(wordcloudDf$ingredient, wordcloudDf$cnt, scale = c(1.5,.25), min.freq = 0,
+#          max.words = 100, 
+#          colors = brewer.pal(max(7, ncol(wordcloudDf$cnt)),&quot;Greens&quot;))
+
+
+layout(matrix(c(1, 2), nrow=2), heights=c(1, 10))
+par(mar=rep(0, 4))
+plot.new()
+text(x=0.3, y=0.5, labels = &quot;Popular Ingredients in Vegetarian Recipes&quot;)
 wordcloud(wordcloudDf$ingredient, wordcloudDf$cnt, scale = c(1.5,.25), min.freq = 0,
           max.words = 100, 
           colors = brewer.pal(max(7, ncol(wordcloudDf$cnt)),&quot;Greens&quot;))</code></pre>
-<p><img src="figures/unnamed-chunk-5-1.png" width="672" /></p>
-</div>
-<div id="bar" class="section level3">
-<h3>Bar</h3>
-<p>Although bar plot is more informative than wordcloud, I found they look overly simple. Any suggestion about how to make them cooler?</p>
-<div id="static" class="section level4">
-<h4>static</h4>
+<p><img src="figures/unnamed-chunk-1-1.png" width="672" /></p>
+<p>The wordcloud provides a quick visual overview of the popular ingredients, from which we can see that cilantro, avocado, and honey are pretty popular in vegetarian recipes, some fruits like strawberry, banana, and blueberry are also well-received.</p>
+<p>To give a more detailed comparison, we then use a bar chart to show the number of recipes contain each ingredient.</p>
 <pre class="r"><code>library(ggplot2)
 library(ggthemes)
 
@@ -455,13 +331,15 @@ top20Ingredient &lt;- ingredientDfCleaned %&gt;%
 
 ggplot(top20Ingredient) + 
   geom_bar(aes(x = ingredient, y = cnt),
-           stat = &quot;identity&quot;, position = &quot;identity&quot;, fill = &quot;#639a67&quot;, alpha = 0.8) +  
+           stat = &quot;identity&quot;, position = &quot;identity&quot;, 
+           fill = &quot;#639a67&quot;, alpha = 0.8, width = 0.8) +  
   geom_text(aes(x = ingredient, y = cnt, label = cnt), 
             color = &quot;white&quot;, fontface = &quot;bold&quot;, size = 3, hjust = 1.5) + 
   coord_flip() + 
   
   labs(
-    title = &quot;&quot;,
+    title = &quot;Need a Little Greenness&quot;,
+    subtitle = &quot;Popular ingredients in vegetarian recipes. \nNumber indicates the number of times the ingredient appear in the top 1000 recipes.&quot;,
     caption = &quot;
     Note: Ingredients appear in less than 10 recipes or more than 300 recipes are excluded.
     Data Source: https://spoonacular.com/food-api/
@@ -475,6 +353,7 @@ ggplot(top20Ingredient) +
     axis.ticks = element_blank(),
     axis.text.x = element_blank(), 
     axis.text.y = element_text(color = &quot;black&quot;, size = 10),
+    plot.subtitle=element_text(size=10, color=&quot;grey60&quot;, face=&quot;italic&quot;),
     axis.title.x = element_blank(),
     axis.title.y = element_blank(),
     
@@ -482,41 +361,8 @@ ggplot(top20Ingredient) +
     
     plot.caption=element_text(size=7, color=&quot;grey40&quot;),
   )</code></pre>
-<p><img src="figures/unnamed-chunk-6-1.png" width="672" /></p>
-</div>
-<div id="interactive" class="section level4">
-<h4>interactive</h4>
-<pre class="r"><code>library(plotly)
-library(forcats)
-
-top20Ingredient &lt;- ingredientDfCleaned %&gt;%
-  filter(cnt &gt; 10 &amp; cnt &lt; 100) %&gt;%
-  top_n(n = 20, wt = cnt) %&gt;%
-  mutate(ingredient = fct_reorder(ingredient, cnt))
-
-
-plot_ly(top20Ingredient,
-        x = ~cnt, y = ~ingredient, name = &quot;&quot;,
-        type = &quot;bar&quot;, orientation = &quot;h&quot;,
-        hovertemplate = paste(&#39;%{y}&#39;, &#39;&lt;br&gt;%{x} recipes&lt;br&gt;&#39;),
-        marker = list(
-          color = &quot;#639a67&quot;,
-          line = list(width = 0)
-        )) %&gt;%
-  layout(title = &quot;Popular Ingredients in Vegetarian Recipes&quot;,
-         xaxis = list(title = &quot;# of recipes with the ingredient&quot;),
-         yaxis = list(title = &quot;&quot;),
-         annotations = list(x = 0.21, y = -0.115, 
-                            text = &quot;Note: Ingredients appear in less than 10 recipes or \nmore than 300 recipes are excluded.&quot;,
-                            showarrow = F, xref=&#39;paper&#39;, yref=&#39;paper&#39;, 
-                            xanchor=&#39;right&#39;, yanchor=&#39;auto&#39;, xshift=0, yshift=0,align=&quot;left&quot;,
-                            font=list(size=10, color=&quot;grey&quot;)))</code></pre>
-<div id="htmlwidget-ccd017231afae3050506" style="width:672px;height:480px;" class="plotly html-widget"></div>
-<script type="application/json" data-for="htmlwidget-ccd017231afae3050506">{"x":{"visdat":{"42e459021cc6":["function () ","plotlyVisDat"]},"cur_data":"42e459021cc6","attrs":{"42e459021cc6":{"x":{},"y":{},"orientation":"h","hovertemplate":"%{y} <br>%{x} recipes<br>","marker":{"color":"#639a67","line":{"width":0}},"name":"","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Popular Ingredients in Vegetarian Recipes","xaxis":{"domain":[0,1],"automargin":true,"title":"# of recipes with the ingredient"},"yaxis":{"domain":[0,1],"automargin":true,"title":"","type":"category","categoryorder":"array","categoryarray":["canned black beans","chili powder","oregano","peanut butter","pecan","lemon zest","apple","buttermilk","blueberry","black pepper","lime juice","strawberry","green onion","banana","heavy cream","maple syrup","sour cream","vanillon","avocado","cilantro","honey"]},"annotations":[{"x":0.21,"y":-0.115,"text":"Note: Ingredients appear in less than 10 recipes or <br />more than 300 recipes are excluded.","showarrow":false,"xref":"paper","yref":"paper","xanchor":"right","yanchor":"auto","xshift":0,"yshift":0,"align":"left","font":{"size":10,"color":"grey"}},{"x":0.21,"y":-0.115,"text":"Note: Ingredients appear in less than 10 recipes or <br />more than 300 recipes are excluded.","showarrow":false,"xref":"paper","yref":"paper","xanchor":"right","yanchor":"auto","xshift":0,"yshift":0,"align":"left","font":{"size":10,"color":"grey"}}],"hovermode":"closest","showlegend":false},"source":"A","config":{"showSendToCloud":false},"data":[{"x":[86,85,79,69,56,56,56,54,53,52,52,51,50,49,48,45,44,41,38,38,38],"y":["honey","cilantro","avocado","vanillon","heavy cream","maple syrup","sour cream","banana","green onion","lime juice","strawberry","black pepper","blueberry","buttermilk","apple","lemon zest","pecan","peanut butter","canned black beans","chili powder","oregano"],"orientation":"h","hovertemplate":["%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>","%{y} <br>%{x} recipes<br>"],"marker":{"color":"#639a67","line":{"color":"rgba(31,119,180,1)","width":0}},"name":"","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
-</div>
-</div>
-</div>
-</div>
+<p><img src="figures/unnamed-chunk-2-1.png" width="480" /></p>
+<p>The bar plot shows that honey, cilantro, and avocado appear in about 80 recipes among the top 1000 recipes, which is about 8%. Given they are not ingredients like suger or salt, this populariy is pretty stunning.</p>
 
 <p>Copyright &copy; 2020 Columbia University GR5063 Data Visualization Group F. All rights reserved.</p>
 
