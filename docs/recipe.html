@@ -318,19 +318,15 @@ wordcloudDf &lt;- ingredientDfCleaned %&gt;%
   filter(cnt &gt; 10 &amp; cnt &lt; 100) 
 
 set.seed(1997)
-#wordcloud(wordcloudDf$ingredient, wordcloudDf$cnt, scale = c(1.5,.25), min.freq = 0,
-#          max.words = 100, 
-#          colors = brewer.pal(max(7, ncol(wordcloudDf$cnt)),&quot;Greens&quot;))
 
-
-layout(matrix(c(1, 2), nrow=2), heights=c(1, 10))
+layout(matrix(c(1, 2), nrow = 2), heights = c(1, 10))
 par(mar=rep(0, 4))
 plot.new()
-text(x=0.3, y=0.5, labels = &quot;Popular Ingredients in Vegetarian Recipes&quot;)
+text(x = 0.5, y = 0.5, cex = 1.1, labels = &quot;Popular Ingredients in Vegetarian Recipes&quot;)
 wordcloud(wordcloudDf$ingredient, wordcloudDf$cnt, scale = c(1.5,.25), min.freq = 0,
           max.words = 100, 
           colors = brewer.pal(max(7, ncol(wordcloudDf$cnt)),&quot;Greens&quot;))</code></pre>
-<p><img src="figures/unnamed-chunk-1-1.png" width="672" /></p>
+<p><img src="figures/unnamed-chunk-1-1.png" width="480" style="display: block; margin: auto;" /></p>
 <p>The wordcloud provides a quick visual overview of the popular ingredients, from which we can see that cilantro, avocado, and honey are pretty popular in vegetarian recipes, some fruits like strawberry, banana, and blueberry are also well-received.</p>
 <p>To give a more detailed comparison, we then use a bar chart to show the number of recipes contain each ingredient.</p>
 <pre class="r"><code>library(ggplot2)
@@ -351,7 +347,7 @@ ggplot(top20Ingredient) +
   
   labs(
     title = &quot;Need a Little Greenness&quot;,
-    subtitle = &quot;Popular ingredients in vegetarian recipes. \nNumber indicates the number of times the ingredient appear in the top 1000 recipes.&quot;,
+    subtitle = &quot;Number of times each ingredient appears in the top 1000 recipes.&quot;,
     caption = &quot;
     Note: Ingredients appear in less than 10 recipes or more than 300 recipes are excluded.
     Data Source: https://spoonacular.com/food-api/
@@ -365,18 +361,21 @@ ggplot(top20Ingredient) +
     axis.ticks = element_blank(),
     axis.text.x = element_blank(), 
     axis.text.y = element_text(color = &quot;black&quot;, size = 10),
-    plot.subtitle=element_text(size=10, color=&quot;grey60&quot;, face=&quot;italic&quot;),
     axis.title.x = element_blank(),
     axis.title.y = element_blank(),
     
     legend.position = &quot;none&quot;,
     
-    plot.caption=element_text(size=7, color=&quot;grey40&quot;),
+    plot.caption = element_text(size=7, color=&quot;grey40&quot;),
+    plot.subtitle = element_text(size=10, color=&quot;grey60&quot;, face=&quot;italic&quot;),
+    plot.title.position = &quot;plot&quot;
+    
+    
   )</code></pre>
-<p><img src="figures/unnamed-chunk-2-1.png" width="480" /></p>
+<p><img src="figures/unnamed-chunk-2-1.png" width="480" style="display: block; margin: auto;" /></p>
 <p>The bar plot shows that honey, cilantro, and avocado appear in about 80 recipes among the top 1000 recipes, which is about 8%. Given they are not ingredients like suger or salt, this populariy is pretty stunning.</p>
 
-<p>Copyright &copy; 2020 Columbia University GR5063 Data Visualization Group F. All rights reserved.</p>
+<p>Data Visualization (QMSS Spring 2020) Group F: Vegan <br> Please do not hesitate to give us your feedback :)</p>
 
 
 
