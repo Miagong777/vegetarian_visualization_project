@@ -2,16 +2,18 @@
     "collab_server" : "",
     "contents" : "",
     "created" : 1588271854870.000,
-    "dirty" : false,
+    "dirty" : true,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "1732481516",
+    "hash" : "0",
     "id" : "D010771E",
     "lastKnownWriteTime" : 1588271851,
-    "last_content_update" : 1588271851,
+    "last_content_update" : 1588273070191,
     "path" : "D:/Columbia_QMSS/2020Spring/vegetarian_visualization_project/about.Rmd",
     "project_path" : "about.Rmd",
     "properties" : {
+        "cursorPosition" : "7,59",
+        "scrollLine" : "0"
     },
     "read_only" : false,
     "read_only_alternatives" : [
