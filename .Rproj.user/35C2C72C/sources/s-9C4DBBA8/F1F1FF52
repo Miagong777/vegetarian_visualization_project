@@ -5,17 +5,17 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "3636207153",
+    "hash" : "3039502120",
     "id" : "F1F1FF52",
-    "lastKnownWriteTime" : 1588281279,
-    "last_content_update" : 1588281279123,
+    "lastKnownWriteTime" : 1588281459,
+    "last_content_update" : 1588281459847,
     "path" : "D:/Columbia_QMSS/2020Spring/vegetarian_visualization_project/recipe.Rmd",
     "project_path" : "recipe.Rmd",
     "properties" : {
-        "cursorPosition" : "96,213",
+        "cursorPosition" : "3,16",
         "ignored_words" : "Wordcloud,ingredientDfCleaned,RData,wordcloud,https,spoonacular,api,br,nmore\n",
         "last_setup_crc32" : "9C4DBBA8b1fdc693",
-        "scrollLine" : "95"
+        "scrollLine" : "0"
     },
     "read_only" : false,
     "read_only_alternatives" : [
