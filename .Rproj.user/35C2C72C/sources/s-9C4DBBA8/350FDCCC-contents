@@ -1,5 +1,5 @@
 name: "DV_project_website"
-output_dir: "docs"
+output_dir: "."
 navbar:
   title: "Data Visualization (QMSS Spring 2020) Group F: Vegan"
   left:
@@ -7,11 +7,13 @@ navbar:
       href: index.html
     - text: "About"
       href: about.html
-    - text: "Recipes"
+    - text: "Vegetarianism and Political Gravity"
+      href: map_restaurant.html
+    - text: "Vegetarian Recipes"
       href: recipe.html      
 output:
   html_document:
-    theme: cosmo
+    theme: paper
     highlight: textmate
     include:
       after_body: footer.html
