@@ -28,7 +28,7 @@ library(ggthemes)
 
 What does a vegetarian diet consist of? What are the most popular elements in vegetarian diet? To find out what a vegetarian's diet is like, we collect the top 1000 popular vegetarian recipes using the [Spoonacular API](https://spoonacular.com/food-api) and create a wordcloud with the most popular ingredients. 
 
-```{r fig.height = 4, fig.width = 5}
+```{r ingredient_wordcloud, fig.height = 4, fig.width = 5}
 library(wordcloud)
 
 load("data\\ingredientDfCleaned.RData")
@@ -52,7 +52,7 @@ The wordcloud provides a quick visual overview of the popular ingredients, from 
 To give a more detailed comparison, we then use a bar chart to show the number of recipes contain each ingredient. 
 
 
-```{r fig.height = 5.5, fig.width = 5}
+```{r ingredient_bar, fig.height = 5.5, fig.width = 5}
 library(ggplot2)
 library(ggthemes)
 
@@ -102,7 +102,7 @@ The bar plot shows that honey, cilantro, and avocado appear in about 80 recipes 
 
 ## How it's Made
 
-Hope you enjoyed the visualization. For the clarity and conciseness of the presentation, I exclude the code for data preprocessing above. Check the code below for more about the data acquisition and wrangling part of these two visualization. Thank you!
+Hope you enjoyed the visualization. For the clarity and efficiency of the presentation, I exclude the code for data preprocessing above. Check the code below for more about the data acquisition and wrangling part of these two visualization. Thank you!
 
 ```{r eval=FALSE}
 combined <- data.frame(recipe_id = integer(),

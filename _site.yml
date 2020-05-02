@@ -1,14 +1,18 @@
 name: "DV_project_website"
 output_dir: "."
 navbar:
-  title: "Data Visualization (QMSS Spring 2020) Group F: Vegan"
+  title: "Group F: Vegan"
   left:
     - text: "Home"
       href: index.html
-    - text: "About"
-      href: about.html
-    - text: "Vegetarianism and Political Gravity"
+    - text: "Who is Vegetarian?"
+      href: demographic.html 
+    - text: "Trend"
+      href: trend.html 
+    - text: "Vegetarian Restaurant and Political Gravity"
       href: map_restaurant.html
+    - text: "Vegetarian Restaurant and Income"
+      href: income.html 
     - text: "Vegetarian Recipes"
       href: recipe.html      
 output:

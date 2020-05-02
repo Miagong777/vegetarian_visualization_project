@@ -272,7 +272,7 @@ $(document).ready(function () {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">Data Visualization (QMSS Spring 2020) Group F: Vegan</a>
+      <a class="navbar-brand" href="index.html">Group F: Vegan</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -280,10 +280,16 @@ $(document).ready(function () {
   <a href="index.html">Home</a>
 </li>
 <li>
-  <a href="about.html">About</a>
+  <a href="demographic.html">Who is Vegetarian?</a>
 </li>
 <li>
-  <a href="map_restaurant.html">Vegetarianism and Political Gravity</a>
+  <a href="trend.html">Trend</a>
+</li>
+<li>
+  <a href="map_restaurant.html">Vegetarian Restaurant and Political Gravity</a>
+</li>
+<li>
+  <a href="income.html">Vegetarian Restaurant and Income</a>
 </li>
 <li>
   <a href="recipe.html">Vegetarian Recipes</a>
@@ -331,7 +337,7 @@ text(x = 0.5, y = 0.5, cex = 1.1, labels = &quot;Popular Ingredients in Vegetari
 wordcloud(wordcloudDf$ingredient, wordcloudDf$cnt, scale = c(1.5,.25), min.freq = 0,
           max.words = 100, 
           colors = brewer.pal(max(7, ncol(wordcloudDf$cnt)),&quot;Greens&quot;))</code></pre>
-<p><img src="figures/unnamed-chunk-1-1.png" width="480" style="display: block; margin: auto;" /></p>
+<p><img src="figures/ingredient_wordcloud-1.png" width="480" style="display: block; margin: auto;" /></p>
 <p>The wordcloud provides a quick visual overview of the popular ingredients, from which we can see that cilantro, avocado, and honey are pretty popular in vegetarian recipes, some fruits like strawberry, banana, and blueberry are also well-received.</p>
 <p>To give a more detailed comparison, we then use a bar chart to show the number of recipes contain each ingredient.</p>
 <pre class="r"><code>library(ggplot2)
@@ -377,11 +383,11 @@ ggplot(top20Ingredient) +
     
     
   )</code></pre>
-<p><img src="figures/unnamed-chunk-2-1.png" width="480" style="display: block; margin: auto;" /></p>
+<p><img src="figures/ingredient_bar-1.png" width="480" style="display: block; margin: auto;" /></p>
 <p>The bar plot shows that honey, cilantro, and avocado appear in about 80 recipes among the top 1000 recipes, which is about 8%. Given they are not ingredients like suger or salt, this populariy is pretty stunning.</p>
 <div id="how-its-made" class="section level2">
 <h2>How it’s Made</h2>
-<p>Hope you enjoyed the visualization. For the clarity and conciseness of the presentation, I exclude the code for data preprocessing above. Check the code below for more about the data acquisition and wrangling part of these two visualization. Thank you!</p>
+<p>Hope you enjoyed the visualization. For the clarity and efficiency of the presentation, I exclude the code for data preprocessing above. Check the code below for more about the data acquisition and wrangling part of these two visualization. Thank you!</p>
 <pre class="r"><code>combined &lt;- data.frame(recipe_id = integer(),
                        recipe_name = character())
 
@@ -480,7 +486,7 @@ save(ingredientDfCleaned, file = &quot;ingredientDfCleaned.RData&quot;)</code></
 
 <hr style="filter: alpha(opacity=100, finishopacity=0, style=3)" width="90%" color=#639a67 size=3>
 
-<p><font size="2" color="#639a67" face="verdana"> Data Visualization (QMSS Spring 2020) ❤ Group F: Vegan ❤  <br> Please do not hesitate to give us your feedback :)</font></p>
+<p><font size="0.5" color="#639a67" face="verdana"> Data Visualization (QMSS Spring 2020) ❤ Group F: Vegan ❤  <br> Please do not hesitate to give us your feedback :)</font></p>
 
 
 

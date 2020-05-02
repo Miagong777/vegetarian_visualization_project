@@ -1,5 +1,5 @@
 ---
-title: "Map of Vegetarian restaurants (concerning political gravity)"
+title: "Vegetarian Restaurant and Political Gravity"
 author: "Lin Zhao"
 output: 
   html_document:
