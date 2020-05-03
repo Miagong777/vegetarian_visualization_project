@@ -341,10 +341,15 @@ ResV$vege &lt;- as.numeric(ResV$vege)</code></pre>
   mutate(latitude=as.numeric(latitude), longitude=as.numeric(longitude)) %&gt;%
   na.omit() </code></pre>
 <pre class="r"><code>library(sp)
-library(maps)
-library(maptools)
-
-# The single argument to this function, pointsDF, is a data.frame in which:
+library(maps)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;maps&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:purrr&#39;:
+## 
+##     map</code></pre>
+<pre class="r"><code>library(maptools)</code></pre>
+<pre><code>## Checking rgeos availability: TRUE</code></pre>
+<pre class="r"><code># The single argument to this function, pointsDF, is a data.frame in which:
 #   - column 1 contains the longitude in degrees (negative in the US)
 #   - column 2 contains the latitude in degrees
 
@@ -434,6 +439,7 @@ ggplot(data=spatial_data)+
   geom_sf(mapping = aes(fill = povertyrate))+
   geom_sf(data=data1,size = 4, shape = 23, fill = &quot;darkred&quot;)+
   theme_map()+theme(legend.position=&quot;right&quot;)</code></pre>
+<p><img src="income_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
 <p>The mapping combined the poverty rate with the number (or the density) of the vegetarian restaurants in New York State.We could see from the figure that, darker blue means lower poverty rate which indicates a higher income or wealth level county. A lighter blue illustrated higher poverty rate which means a lower income or wealth level county. From the paragraph, we could conclude that there is no clear pattern between vegetarian restaurants and the poverty rate in New York State.</p>
 </div>
 </div>

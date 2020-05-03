@@ -193,7 +193,7 @@ ggplot() +
 ```
 
 
-```{r eval=F}
+```{r}
 data1 <- st_as_sf(data, coords = c("longitude", "latitude"),crs = 4326, agr = "constant")
 
 ggplot(data=spatial_data)+
