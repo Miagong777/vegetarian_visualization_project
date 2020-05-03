@@ -5,16 +5,16 @@ navbar:
   left:
     - text: "Home"
       href: index.html
-    - text: "Who is Vegetarian?"
-      href: demographic.html 
-    - text: "Trend"
-      href: trend.html 
     - text: "Vegetarian Restaurant and Political Gravity"
-      href: map_restaurant.html
+      href: ideology.html
     - text: "Vegetarian Restaurant and Income"
       href: income.html 
     - text: "Vegetarian Recipes"
-      href: recipe.html      
+      href: recipe.html   
+    - text: "Trend"
+      href: trend.html 
+    - text: "Profile"
+      href: demographic.html 
 output:
   html_document:
     theme: paper

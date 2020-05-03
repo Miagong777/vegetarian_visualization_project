@@ -1,5 +1,5 @@
 ---
-title: "Vegetarian Trend"
+title: "Interest Trend"
 author: "Taketo Muroya"
 output: 
   html_document:
