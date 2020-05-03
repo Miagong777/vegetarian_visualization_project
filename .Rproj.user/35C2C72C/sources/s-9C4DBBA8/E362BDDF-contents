@@ -1,7 +1,0 @@
----
-title: "Introduction"
----
-
-Along with growing interests in healty life and animal protection, the concept of "Vegetarian" or "Vegan" has become more and more familiar among people. Nowadays, we often see the vegetarian or vegan menus in restaurants. Observing the expansion of vegans, "The Economist" said that 2019 would be ["the Year of the Vegan."](https://worldin2019.economist.com/theyearofthevegan) Therefore, it is worth exploring the data about vegetarian or vegan restaurants, recipes, and profiles.
-
-This website visualizes the locations of vegetarian or vegan restraunts in New York state and then, examines its relationship with [political ideology](https://sun-wenjun.github.io/vegetarian_visualization_project/map_restaurant.html) and poverty situation. Also, implementing the text analysis on [vegetarian recipes](https://sun-wenjun.github.io/vegetarian_visualization_project/recipe.html), it is revealed what kind of ingredients are most likely included. In additon, the interest trend of vegetarian on websites, and the personal character of vegetarian, is studied.

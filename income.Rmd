@@ -3,13 +3,14 @@ title: "Vegetarian Restaurant and Income"
 author: "Ming Gong"
 output: 
   html_document:
-    code_folding: hide
+    code_folding: show
 ---
-This version is modified by Wenjun based on Ming's work. 
 
-```{r, include=FALSE}
+```{r, include=FALSE, results='hide', warning=FALSE}
 library(leaflet)
-library(knitr) 
+library(knitr) # I think this is the key. 
+
+library(leaflet) # also, it's probably a better idea to load librarys before use them 
 library(readr)
 library(dplyr)
 library(tidyr)
@@ -28,12 +29,12 @@ library(tidyverse)
 library(stringr)
 ```
 
-```{r}
-Res=read.csv("data//Restaurant.csv")
+```{r setup, include=FALSE}
+Res=read.csv("data\\Restaurant.csv",stringsAsFactors=F)
 ```
 
 ```{r}
-Income=read.csv("data//Income.csv")
+Income=read.csv("data\\Income.csv")
 
 Income<-Income %>% 
   rename(
@@ -42,6 +43,7 @@ Income<-Income %>%
     povertyrate=All.Ages.in.Poverty.Percent
     )
 ```
+
 
 ```{r}
 a =Res$cuisines
@@ -53,6 +55,7 @@ ResV <- cbind(vege,Res)
 ```
 
 ```{r}
+#class(ResV$vege)
 ResV$vege <- as.numeric(ResV$vege)
 ```
 
@@ -61,13 +64,14 @@ ResVV <- subset(ResV,vege==1)
 ```
 
 ## create a new dataset that I convert to lat and lon to the county level
-```{r}
+```{r warning=FALSE}
 ResVVV <- ResVV %>% 
   dplyr::select(id,city,name,latitude, longitude,phones,paymentTypes,postalCode) %>% 
-  na.omit()
-```
+  mutate(latitude=as.numeric(latitude), longitude=as.numeric(longitude)) %>%
+  na.omit() 
 
-```{r}
+```
+```{r warning=FALSE}
 library(sp)
 library(maps)
 library(maptools)
@@ -97,8 +101,8 @@ latlong2county <- function(pointsDF) {
 }
 
 # Test the function using points in Wisconsin and Oregon.
-testPoints <- data.frame(x = as.numeric(ResVVV$longitude), y = as.numeric(ResVVV$latitude))
-
+# testPoints <- data.frame(x = ResVVV$longitude, y = ResVVV$latitude)
+testPoints <- data.frame(x = ResVVV$longitude, y = ResVVV$latitude)
 county_list<- latlong2county(testPoints)
 ```
 
@@ -110,6 +114,7 @@ VRes<-cbind(ResVVV,county_list_data)
 ```{r}
 VRes<-VRes %>%
   na.omit
+#unique(VRes$county_list)
 ```
 
 ```{r}
@@ -118,7 +123,19 @@ county_name <- as.character(VRes$county_list)
 county_name2 <- gsub(".*,","",county_name)
 data <- cbind(county_name2,VRes)  
 data$county_list <- NULL
+
 ```
+
+```{r}
+#unique(data$county_name2)
+```
+
+
+
+
+
+
+
 
 ### data manipulation
 ```{r}
@@ -131,6 +148,7 @@ Income<-Income %>%
     povertyrate=All.Ages.in.Poverty.Percent
     )
 Income$county_id=as.character(Income$county_id)
+
 ```
 ```{r}
 counties_sf <- get_urbn_map("counties", sf = TRUE)
@@ -150,9 +168,11 @@ ggplot() +
 ```
 
 
+How is the distribution of vegetarian restaurants in New York State? Does poverty rate relate to that distribution? To dive into those questions, we combine two datasets (one contains NY restaurants from datafiniti and another comes from U.S.Income & Poverty rate dataset) together for visualization.
 
 
-###Plot income(poverty) map
+
+### Plot income(poverty) map
 ```{r}
 
 counties_sf <- get_urbn_map("counties", sf = TRUE)
@@ -172,18 +192,19 @@ ggplot() +
 
 ```
 
-```{r}
-ggplot() +
-  geom_sf(spatial_data,
-          mapping = aes(fill = povertyrate),
-          color = "#ffffff", size = 0.25) +
-  labs(fill = "povertyrate")+
-  geom_point(data=data,
-  aes(x=longitude,y=latitude))
 
+```{r eval=F}
+data1 <- st_as_sf(data, coords = c("longitude", "latitude"),crs = 4326, agr = "constant")
+
+ggplot(data=spatial_data)+
+  geom_sf(mapping = aes(fill = povertyrate))+
+  geom_sf(data=data1,size = 4, shape = 23, fill = "darkred")+
+  theme_map()+theme(legend.position="right")
 ```
-```{r}
-ggplot()+
- geom_point(data=data,
-  aes(x=longitude,y=latitude))
-```
+
+
+
+The mapping combined the poverty rate with the number (or the density) of the vegetarian restaurants in New York State.We could see from the figure that, darker blue means lower poverty rate which indicates a higher income or wealth level county. A lighter blue illustrated higher poverty rate which means a lower income or wealth level county. From the paragraph, we could conclude that there is no clear pattern between vegetarian restaurants and the poverty rate in New York State.
+
+
+
