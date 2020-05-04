@@ -9,7 +9,13 @@ output:
 ```{r, include=FALSE, results='hide', warning=FALSE}
 library(leaflet)
 library(knitr) # I think this is the key. 
-
+opts_chunk$set(fig.path="figures\\",
+               cache.path="cache\\",
+               cache=FALSE,
+               echo=TRUE,
+               message=FALSE,
+               warning=FALSE,
+               fig.align = 'center') 
 library(leaflet) # also, it's probably a better idea to load librarys before use them 
 library(readr)
 library(dplyr)
