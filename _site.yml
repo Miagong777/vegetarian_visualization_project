@@ -1,5 +1,5 @@
 name: "DV_project_website"
-output_dir: "docs"
+output_dir: "."
 navbar:
   title: "Group F: Vegan"
   left:
