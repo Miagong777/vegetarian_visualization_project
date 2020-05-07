@@ -6,7 +6,7 @@ navbar:
     - text: "Home"
       href: index.html
     - text: "Vegetarian Restaurant and Political Gravity"
-      href: ideology.html
+      href: ideology_updated.html
     - text: "Vegetarian Restaurant and Income"
       href: income.html 
     - text: "Vegetarian Recipes"

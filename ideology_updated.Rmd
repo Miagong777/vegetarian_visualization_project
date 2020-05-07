@@ -1,0 +1,207 @@
+---
+title: "Vegetarian Restaurant and Political Ideology"
+author: "Lin Zhao"
+output: 
+  html_document:
+    code_folding: hide
+---
+
+```{r Setup, include=FALSE, results='hide', warning=FALSE}
+library(knitr)
+opts_chunk$set(fig.path="figures\\",
+               cache.path="cache\\",
+               cache=FALSE,
+               echo=TRUE,
+               message=FALSE,
+               warning=FALSE,
+               fig.align = 'center') 
+```
+
+How is the geographical distribution of vegetarian restaurants in New York State? (Here, the definition of vegetarian restaurants are restaurants that contain “Vegetarian” cuisine) How is the political ideology underlying the county  which the restaurant belongs to ? To dive into those questions, we combine two datasets (one contains NY restaurants from datafiniti and another comes from 2016 U.S. presidential election) together for visualization.
+ 
+```{r warning=FALSE}
+load(file = "data\\cleaned_datapart1_updated.Rdata")
+load(file = "data\\cleaned_datapart2_updated.Rdata")
+
+library(leaflet)
+
+library(RColorBrewer)
+
+pal = colorFactor(palette = c("blue", "red"), domain = df$R.D) # Grab a palette
+color_vote = pal(df$R.D)
+
+content2 <- paste("County:",data6$county_name2,"<br/>",
+                 "Restaurant Name:",data6$name,"<br/>",
+                 "Phones:",data6$phones,"<br/>",
+                 "PaymentType:",data6$paymentTypes,"<br/>",
+                 "PostCode:",data6$postalCode,"<br/>"
+                 )
+
+
+content3 <- paste("County:",df$county_name,"<br/>",
+                 "Restaurant Name:",df$name,"<br/>",
+                 "Phones:",df$phones,"<br/>",
+                 "PaymentType:",df$paymentTypes,"<br/>",
+                 "PostCode:",df$postalCode,"<br/>"
+                 )
+                
+m <- leaflet(data=data6) %>%
+   # Base groups
+  addTiles(group = "OSM (default)") %>%
+  addProviderTiles(providers$Stamen.Toner, group = "Toner") %>%
+  addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") %>%
+   # Overlay groups
+  addCircles(
+             color="green",
+             lng = ~longitude, 
+             lat = ~latitude,
+             popup = content2,
+             group = "Vegetarian Restaurants") %>% 
+  addCircleMarkers(data = df, 
+             lng = ~longitude, 
+             lat = ~latitude,
+             popup = content3,
+             group = "Political Ideology",
+             color= color_vote) %>%
+  addLegend(pal = pal, values = ~df$R.D, title = "Won Party in 2016") %>% 
+  # Layers control
+  addLayersControl(
+    baseGroups = c("OSM (default)", "Toner", "Toner Lite"),
+    overlayGroups = c("Vegetarian Restaurants", "Political Ideology"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+
+m
+
+
+```
+
+The leaflet gives you a choice to see what you wanna take a look. When you click the botton of ‘Vegetarian Restaurants’, it provides a quick visual overview of the geographical distribution of vegetarian restaurants in New York State. Also, from popup windows, you could find more restaurants information, including payment type, phone numbers, name of the restaurant, county and post code. When clicking the button of ‘Political Ideology’, you could quickly know the county where each restaurant is located at support which political party in 2016 presidential election. The color blue represents who are democratic supporters and the color red shows who are republican supporters.
+
+Interestingly, from the map we notice that vegetarian restaurants scatters in the rural area while dense in the urban area such as Manhattan. In other words, the spatial pattern might be strongly related to population density. 
+
+ 
+## For data cleaning part 
+
+Here is the code for data wrangling.
+```{r eval=FALSE}
+#import resturant csv to my computer
+data1 <- read.csv("data//Restaurant.csv")
+head(data1)
+
+class(data1$cuisines)
+a <- as.character(data1$cuisines) 
+
+#I am trying to identity which resturant is vegetarian
+library("stringr")
+vege <- str_detect(a,"Vegetarian")
+data2 <- cbind(vege,data1)
+
+#Filter out the restaurant which is not vegetarian
+class(data2$vege)
+data2$vege <- as.numeric(data2$vege)
+
+#do the subset for vege
+library(dplyr)
+data3 <- subset(data2,vege==1) 
+
+
+## create a new dataset that I convert to lat and lon to the county level
+library(dplyr)
+data4 <- data3 %>% 
+  select(id,city,name,latitude, longitude,phones,paymentTypes,postalCode) %>% 
+  na.omit()
+
+library(sp)
+library(maps)
+library(maptools)
+
+# The single argument to this function, pointsDF, is a data.frame in which:
+#   - column 1 contains the longitude in degrees (negative in the US)
+#   - column 2 contains the latitude in degrees
+
+latlong2county <- function(pointsDF) {
+    # Prepare SpatialPolygons object with one SpatialPolygon
+    # per county
+    counties <- map('county', fill=TRUE, col="transparent", plot=FALSE)
+    IDs <- sapply(strsplit(counties$names, ":"), function(x) x[1])
+    counties_sp <- map2SpatialPolygons(counties, IDs=IDs,
+                     proj4string=CRS("+proj=longlat +datum=WGS84"))
+
+    # Convert pointsDF to a SpatialPoints object 
+    pointsSP <- SpatialPoints(pointsDF, 
+                    proj4string=CRS("+proj=longlat +datum=WGS84"))
+
+    # Use 'over' to get _indices_ of the Polygons object containing each point 
+    indices <- over(pointsSP, counties_sp)
+
+    # Return the county names of the Polygons object containing each point
+    countyNames <- sapply(counties_sp@polygons, function(x) x@ID)
+    countyNames[indices]
+}
+
+# Test the function using points in Wisconsin and Oregon.
+testPoints <- data.frame(x = data4$longitude, y = data4$latitude)
+
+county_list<- latlong2county(testPoints)
+
+
+county_list_data <- as.data.frame(county_list)
+data5 <- cbind(data4,county_list_data) #merge to data4 by adding a column named county_list
+
+data5 <- data5 %>% 
+  na.omit()
+unique(data5$county_list)
+
+#regular expression for ny vege restaurant data
+county_name <- as.character(data5$county_list)
+# Remove all before and up to ",":
+county_name2 <- gsub(".*,","",county_name)
+data6 <- cbind(county_name2,data5)  
+data6$county_list <- NULL
+data6
+
+
+#import election data
+eleccounty<-read.csv("data//2016_US_County_Level_Presidential_Results.csv")
+
+eleccounty$X1 <- NULL
+
+eleccounty <- eleccounty %>% 
+         filter(state_abbr=="NY") #there are 62 counties in NY State
+
+#do some regular expression on election data
+foo <- as.character(eleccounty$county_name)
+
+foo2 <- gsub("\\s*\\w*$", "", foo)
+foo3 <- tolower(foo2)
+foo4 <- str_replace(foo3, "st. lawrence", "st lawrence")
+
+
+#regular expression of final step for election data
+new_eleccounty <- cbind(eleccounty,foo4)
+
+names(new_eleccounty)[names(new_eleccounty) == 'foo4'] <- 'county_name2'
+
+
+
+#calculate who is win in 2016 on the county level
+new_eleccounty <- new_eleccounty %>% 
+  mutate(difference_in_vote=votes_gop-votes_dem) %>% 
+  mutate (R.D= ifelse(difference_in_vote > 0, "Republican", "Democrat"))
+
+
+#combine cleaned ny vege reastaurant with election county data in 2016
+#left outer join
+df <- left_join(data6, new_eleccounty,by = "county_name2")
+
+df$paymentTypes <- as.character(df$paymentTypes)
+df$paymentTypes[df$paymentTypes==""] <- "NA"
+df$paymentTypes <- as.factor(df$paymentTypes)
+
+
+save(data6, file ="cleaned_datapart1.Rdata" )
+save(df, file ="cleaned_datapart2.Rdata" )
+```
+
+
