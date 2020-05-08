@@ -339,6 +339,21 @@ wordcloud(wordcloudDf$ingredient, wordcloudDf$cnt, scale = c(1.5,.25), min.freq 
           colors = brewer.pal(max(7, ncol(wordcloudDf$cnt)),&quot;Greens&quot;))</code></pre>
 <p><img src="figures/ingredient_wordcloud-1.png" width="480" style="display: block; margin: auto;" /></p>
 <p>The wordcloud provides a quick visual overview of the popular ingredients, from which we can see that cilantro, avocado, and honey are pretty popular in vegetarian recipes, some fruits like strawberry, banana, and blueberry are also well-received.</p>
+<p>Thanks to the suggestion of a classmate, we decide to also play around with the title of the recipes.</p>
+<pre class="r"><code>load(&quot;data//titleWordCount.RData&quot;)
+
+titleDf &lt;- titleDf %&gt;%
+  filter(n &gt; 20) 
+
+set.seed(23)
+
+layout(matrix(c(1, 2), nrow = 2), heights = c(1, 10))
+par(mar=rep(0, 4))
+plot.new()
+wordcloud(titleDf$word, titleDf$n, scale = c(3,.25), min.freq = 0,
+          max.words = 100, 
+          colors = brewer.pal(max(7, ncol(titleDf$n)),&quot;Greens&quot;))</code></pre>
+<p><img src="figures/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>To give a more detailed comparison, we then use a bar chart to show the number of recipes contain each ingredient.</p>
 <pre class="r"><code>library(ggplot2)
 library(ggthemes)
@@ -388,7 +403,10 @@ ggplot(top20Ingredient) +
 <div id="how-its-made" class="section level2">
 <h2>How it’s Made</h2>
 <p>Hope you enjoyed the visualization. For the clarity and efficiency of the presentation, I exclude the code for data preprocessing above. Check the code below for more about the data acquisition and wrangling part of these two visualization. Thank you!</p>
-<pre class="r"><code>combined &lt;- data.frame(recipe_id = integer(),
+<pre class="r"><code>library(httr)
+library(jsonlite)
+
+combined &lt;- data.frame(recipe_id = integer(),
                        recipe_name = character())
 
 for (n in seq(0,900,100)) {
@@ -482,6 +500,28 @@ ingredientDfCleaned &lt;- ingredientDf %&gt;%
   arrange(desc(cnt))
 
 save(ingredientDfCleaned, file = &quot;ingredientDfCleaned.RData&quot;)</code></pre>
+<pre class="r"><code>library(tm) 
+
+load(&quot;combined_recipe_id_ingredient.RData&quot;)
+
+myStopWords &lt;- c(&quot;quick&quot;, &quot;best&quot;, &quot;black&quot;, &quot;homemade&quot;)
+
+allTitle &lt;- paste(combined$recipe_name, collapse = &quot; &quot;) %&gt;%
+  removeNumbers() %&gt;%
+  removePunctuation() %&gt;%
+  tolower() %&gt;%
+  removeWords(c(stopwords(&quot;english&quot;), myStopWords)) %&gt;%
+  stripWhitespace()
+
+titleList &lt;- strsplit(allTitle, &quot; &quot;)
+titleDf &lt;- data.frame(titleList, stringsAsFactors = FALSE) 
+names(titleDf) &lt;- &quot;word&quot;
+titleDf &lt;- titleDf %&gt;%
+  group_by(word) %&gt;%
+  tally() %&gt;%
+  ungroup()
+
+save(titleDf, file=&quot;titleWordCount.RData&quot;)</code></pre>
 </div>
 
 <hr style="filter: alpha(opacity=100, finishopacity=0, style=3)" width="90%" color=#639a67 size=3>

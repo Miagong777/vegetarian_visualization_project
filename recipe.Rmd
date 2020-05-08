@@ -18,9 +18,6 @@ opts_chunk$set(fig.path="figures\\",
 library(dplyr)
 library(tidyverse)
 
-library(httr)
-library(jsonlite)
-
 library(wordcloud)
 library(ggplot2)
 library(ggthemes)
@@ -48,6 +45,24 @@ wordcloud(wordcloudDf$ingredient, wordcloudDf$cnt, scale = c(1.5,.25), min.freq 
 ```
 
 The wordcloud provides a quick visual overview of the popular ingredients, from which we can see that cilantro, avocado, and honey are pretty popular in vegetarian recipes, some fruits like strawberry, banana, and blueberry are also well-received. 
+
+Thanks to the suggestion of a classmate, we decide to also play around with the title of the recipes. 
+
+```{r}
+load("data//titleWordCount.RData")
+
+titleDf <- titleDf %>%
+  filter(n > 20) 
+
+set.seed(23)
+
+layout(matrix(c(1, 2), nrow = 2), heights = c(1, 10))
+par(mar=rep(0, 4))
+plot.new()
+wordcloud(titleDf$word, titleDf$n, scale = c(3,.25), min.freq = 0,
+          max.words = 100, 
+          colors = brewer.pal(max(7, ncol(titleDf$n)),"Greens"))
+```
 
 To give a more detailed comparison, we then use a bar chart to show the number of recipes contain each ingredient. 
 
@@ -105,6 +120,9 @@ The bar plot shows that honey, cilantro, and avocado appear in about 80 recipes 
 Hope you enjoyed the visualization. For the clarity and efficiency of the presentation, I exclude the code for data preprocessing above. Check the code below for more about the data acquisition and wrangling part of these two visualization. Thank you!
 
 ```{r eval=FALSE}
+library(httr)
+library(jsonlite)
+
 combined <- data.frame(recipe_id = integer(),
                        recipe_name = character())
 
@@ -207,6 +225,30 @@ ingredientDfCleaned <- ingredientDf %>%
 save(ingredientDfCleaned, file = "ingredientDfCleaned.RData")
 ```
 
+```{r eval=F}
+library(tm) 
+
+load("combined_recipe_id_ingredient.RData")
+
+myStopWords <- c("quick", "best", "black", "homemade")
+
+allTitle <- paste(combined$recipe_name, collapse = " ") %>%
+  removeNumbers() %>%
+  removePunctuation() %>%
+  tolower() %>%
+  removeWords(c(stopwords("english"), myStopWords)) %>%
+  stripWhitespace()
+
+titleList <- strsplit(allTitle, " ")
+titleDf <- data.frame(titleList, stringsAsFactors = FALSE) 
+names(titleDf) <- "word"
+titleDf <- titleDf %>%
+  group_by(word) %>%
+  tally() %>%
+  ungroup()
+
+save(titleDf, file="titleWordCount.RData")
+```
 
 
 
