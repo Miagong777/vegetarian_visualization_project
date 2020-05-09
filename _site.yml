@@ -12,7 +12,7 @@ navbar:
     - text: "Vegetarian Recipes"
       href: recipe.html   
     - text: "Trend"
-      href: trend.html 
+      href: trend_updated.html 
     - text: "Profile"
       href: demographic.html 
 output:
