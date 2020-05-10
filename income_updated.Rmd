@@ -3,7 +3,7 @@ title: "Vegetarian Restaurant and Income"
 author: "Ming Gong"
 output: 
   html_document:
-    code_folding: show
+    code_folding: hide
 ---
 
 ```{r, include=FALSE, results='hide', warning=FALSE}
@@ -46,29 +46,20 @@ Income<-Income %>%
     county_id=County.ID,
     povertyrate=All.Ages.in.Poverty.Percent
     )
-```
 
-```{r}
 Res=read.csv("data\\Restaurant.csv", stringsAsFactors=F)
-```
 
-
-```{r}
 a =Res$cuisines
 vege <- str_detect(a,"Vegetarian")
 ResV <- cbind(vege,Res)
-```
 
-```{r}
 ResV$vege <- as.numeric(ResV$vege)
 ResVV <- subset(ResV,vege==1) 
 ResVVV <- ResVV %>% 
   dplyr::select(id,city,name,latitude, longitude,phones,paymentTypes,postalCode) %>% 
   mutate(latitude=as.numeric(latitude), longitude=as.numeric(longitude)) %>%
   na.omit()
-```
 
-```{r}
 latlong2county <- function(pointsDF) {
     # Prepare SpatialPolygons object with one SpatialPolygon
     # per county
@@ -93,25 +84,20 @@ latlong2county <- function(pointsDF) {
 testPoints <- data.frame(x = ResVVV$longitude, y = ResVVV$latitude)
 
 county_list<- latlong2county(testPoints)
-```
 
-```{r}
 county_list_data<-as.data.frame(county_list)
 VRes<-cbind(ResVVV,county_list_data)
 VRes<-VRes %>%
   na.omit
-unique(VRes$county_list)
-```
-```{r}
+#unique(VRes$county_list)
+
 county_name <- as.character(VRes$county_list)
 # Remove all before and up to ",":
 county_name2 <- gsub(".*,","",county_name)
 data <- cbind(county_name2,VRes)  
 data$county_list <- NULL
-unique(data$county_name2)
-```
+#unique(data$county_name2)
 
-```{r}
 Income=read.csv("data\\Income.csv",stringsAsFactors=F)
 
 Income<-Income %>% 
@@ -125,7 +111,7 @@ Income$county_id=as.character(Income$county_id)
 
 How is the distribution of vegetarian restaurants in New York State? Does poverty rate relate to that distribution? To dive into those questions, we combine two datasets (one contains NY restaurants from datafiniti and another comes from U.S.Income & Poverty rate dataset) together for visualization.
 
-###Plot income(poverty) map
+### Plot income(poverty) map
 ```{r}
 counties_sf <- get_urbn_map("counties", sf = TRUE)
 counties_sf<-counties_sf %>%
@@ -142,7 +128,6 @@ ggplot() +
           color = "#ffffff", size = 0.25) +
   labs(fill = "povertyrate")
 ```
-
 
 ```{r}
 data1 <- st_as_sf(data, coords = c("longitude", "latitude"),
