@@ -14,7 +14,7 @@ navbar:
     - text: "Vegetarian Restaurant and Political Gravity"
       href: ideology_updated.html
     - text: "Vegetarian Restaurant and Income"
-      href: income.html 
+      href: income_updated.html 
 
 
 output:
