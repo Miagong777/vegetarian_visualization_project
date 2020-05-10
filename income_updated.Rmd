@@ -3,12 +3,11 @@ title: "Vegetarian Restaurant and Income"
 author: "Ming Gong"
 output: 
   html_document:
-    code_folding: show
+    code_folding: hide
 ---
 
 ```{r, include=FALSE, results='hide', warning=FALSE}
-library(leaflet)
-library(knitr) # I think this is the key. 
+library(knitr) 
 opts_chunk$set(fig.path="figures\\",
                cache.path="cache\\",
                cache=FALSE,
@@ -16,16 +15,15 @@ opts_chunk$set(fig.path="figures\\",
                message=FALSE,
                warning=FALSE,
                fig.align = 'center') 
-library(leaflet) # also, it's probably a better idea to load librarys before use them 
-library(readr)
+library(leaflet) 
 library(dplyr)
 library(tidyr)
 library(magrittr)
 library(RANN)
 library(ggplot2)
 library(lubridate)
-library(ggmap)
 library(sf)
+library(ggmap)
 library(geojsonio)
 library(ggthemes)
 library(viridis)
@@ -33,14 +31,14 @@ library(raster)
 library(urbnmapr)
 library(tidyverse)
 library(stringr)
-```
-
-```{r setup, include=FALSE}
-Res=read.csv("data\\Restaurant.csv",stringsAsFactors=F)
+library(sp)
+library(maps)
+library(maptools)
+library(plotly)
 ```
 
 ```{r}
-Income=read.csv("data\\Income.csv")
+Income=read.csv("data\\Income.csv",stringsAsFactors=F)
 
 Income<-Income %>% 
   rename(
@@ -48,43 +46,19 @@ Income<-Income %>%
     county_id=County.ID,
     povertyrate=All.Ages.in.Poverty.Percent
     )
-```
 
+Res=read.csv("data\\Restaurant.csv", stringsAsFactors=F)
 
-```{r}
 a =Res$cuisines
-```
-
-```{r}
 vege <- str_detect(a,"Vegetarian")
 ResV <- cbind(vege,Res)
-```
 
-```{r}
-#class(ResV$vege)
 ResV$vege <- as.numeric(ResV$vege)
-```
-
-```{r}
 ResVV <- subset(ResV,vege==1) 
-```
-
-## create a new dataset that I convert to lat and lon to the county level
-```{r warning=FALSE}
 ResVVV <- ResVV %>% 
   dplyr::select(id,city,name,latitude, longitude,phones,paymentTypes,postalCode) %>% 
   mutate(latitude=as.numeric(latitude), longitude=as.numeric(longitude)) %>%
-  na.omit() 
-
-```
-```{r warning=FALSE}
-library(sp)
-library(maps)
-library(maptools)
-
-# The single argument to this function, pointsDF, is a data.frame in which:
-#   - column 1 contains the longitude in degrees (negative in the US)
-#   - column 2 contains the latitude in degrees
+  na.omit()
 
 latlong2county <- function(pointsDF) {
     # Prepare SpatialPolygons object with one SpatialPolygon
@@ -107,45 +81,24 @@ latlong2county <- function(pointsDF) {
 }
 
 # Test the function using points in Wisconsin and Oregon.
-# testPoints <- data.frame(x = ResVVV$longitude, y = ResVVV$latitude)
 testPoints <- data.frame(x = ResVVV$longitude, y = ResVVV$latitude)
-county_list<- latlong2county(testPoints)
-```
 
-```{r}
+county_list<- latlong2county(testPoints)
+
 county_list_data<-as.data.frame(county_list)
 VRes<-cbind(ResVVV,county_list_data)
-```
-
-```{r}
 VRes<-VRes %>%
   na.omit
 #unique(VRes$county_list)
-```
 
-```{r}
 county_name <- as.character(VRes$county_list)
 # Remove all before and up to ",":
 county_name2 <- gsub(".*,","",county_name)
 data <- cbind(county_name2,VRes)  
 data$county_list <- NULL
-
-```
-
-```{r}
 #unique(data$county_name2)
-```
 
-
-
-
-
-
-
-
-### data manipulation
-```{r}
-Income=read.csv("data//Income.csv")
+Income=read.csv("data\\Income.csv",stringsAsFactors=F)
 
 Income<-Income %>% 
   rename(
@@ -154,33 +107,12 @@ Income<-Income %>%
     povertyrate=All.Ages.in.Poverty.Percent
     )
 Income$county_id=as.character(Income$county_id)
-
 ```
-```{r}
-counties_sf <- get_urbn_map("counties", sf = TRUE)
-
-
-spatial_data <- left_join(counties_sf,
-                          Income,
-                         by=c("county_fips"="county_id"))
-
-ggplot() +
-  geom_sf(spatial_data,
-          mapping = aes(fill = povertyrate),
-          color = "#ffffff", size = 0.25) +
-  labs(fill = "povertyrate")+
-  geom_point(data=data,
-  aes(x=longitude,y=latitude))
-```
-
 
 How is the distribution of vegetarian restaurants in New York State? Does poverty rate relate to that distribution? To dive into those questions, we combine two datasets (one contains NY restaurants from datafiniti and another comes from U.S.Income & Poverty rate dataset) together for visualization.
 
-
-
 ### Plot income(poverty) map
 ```{r}
-
 counties_sf <- get_urbn_map("counties", sf = TRUE)
 counties_sf<-counties_sf %>%
 filter(state_name == "New York")
@@ -195,22 +127,24 @@ ggplot() +
           mapping = aes(fill = povertyrate),
           color = "#ffffff", size = 0.25) +
   labs(fill = "povertyrate")
-
 ```
-
 
 ```{r}
-data1 <- st_as_sf(data, coords = c("longitude", "latitude"),crs = 4326, agr = "constant")
+data1 <- st_as_sf(data, coords = c("longitude", "latitude"),
+crs = 4326, agr = "constant")
 
-ggplot(data=spatial_data)+
-  geom_sf(mapping = aes(fill = povertyrate))+
-  geom_sf(data=data1,size = 4, shape = 23, fill = "darkred")+
-  theme_map()+theme(legend.position="right")
+g<-ggplot(data=spatial_data)+geom_sf(mapping = aes(fill = povertyrate))+geom_sf(data=data1,size = 4, shape = 23, fill = "darkred")+theme_map()+theme(legend.position="right")
+
+g1<-ggplotly(g) %>%
+  highlight(
+    "plotly_hover",
+    selected = attrs_selected(line = list(color = "black"))
+) 
+  
+
+g1
+
 ```
-
-
-
-The mapping combined the poverty rate with the number (or the density) of the vegetarian restaurants in New York State.We could see from the figure that, darker blue means lower poverty rate which indicates a higher income or wealth level county. A lighter blue illustrated higher poverty rate which means a lower income or wealth level county. From the paragraph, we could conclude that there is no clear pattern between vegetarian restaurants and the poverty rate in New York State.
 
 
 

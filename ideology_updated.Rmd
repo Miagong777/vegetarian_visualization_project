@@ -17,7 +17,7 @@ opts_chunk$set(fig.path="figures\\",
                fig.align = 'center') 
 ```
 
-How is the geographical distribution of vegetarian restaurants in New York State? (Here, the definition of vegetarian restaurants are restaurants that contain “Vegetarian” cuisine) How is the political ideology underlying the county  which the restaurant belongs to ? To dive into those questions, we combine two datasets (one contains NY restaurants from datafiniti and another comes from 2016 U.S. presidential election) together for visualization.
+How is the geographical distribution of vegetarian restaurants in New York State? (Here, the definition of vegetarian restaurants refers to restaurants that contain “Vegetarian” cuisine) How is the political ideology underlying the county  which the restaurant belongs to ? To dive into those questions, we combine two datasets (one contains NY restaurants from datafiniti and another comes from 2016 U.S. presidential election) together for visualization.
  
 ```{r warning=FALSE}
 load(file = "data\\cleaned_datapart1_updated.Rdata")
