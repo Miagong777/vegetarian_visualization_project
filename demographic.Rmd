@@ -30,8 +30,7 @@ consumer <- transform(consumer, category=factor(category,
                                "$0-$30K", "$30K-$75K", "$75K+",
                                "Conservative", "Moderate", "Liberal")))
 
-consumer <- 
-  transform(consumer, group=factor(group, levels=c("vegetarian", "vegan")))
+consumer <- transform(consumer, group=factor(group, levels=c("vegetarian", "vegan")))
 
 # visualization
 p1<-ggplot(consumer[1:8,], aes(x=category, y=value, fill=group))+
@@ -55,4 +54,4 @@ p3<-ggplot(consumer[15:20,], aes(x=category, y=value, fill=group))+
 gridExtra::grid.arrange(p1, p2, p3, nrow = 1)
 ```
 
-Relatively younger people seem to be vegetaraian or vegan. Surprisingly, relatively low income people are more likely to be vegetaraian or vegan. In addition, liberal people are more like vegetaraian or vegan than conservative people.
+Relatively younger people seem to be vegetarian or vegan. Surprisingly, relatively low-income people are more likely to be vegetarian or vegan. In addition, liberal people are more like vegetarian or vegan than conservative people.
